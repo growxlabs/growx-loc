@@ -1,0 +1,9 @@
+{
+  "name": "@growx-loc/db",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check ."
+  }
+}
