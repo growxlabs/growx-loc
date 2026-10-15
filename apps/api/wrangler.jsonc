@@ -3,6 +3,13 @@
   "name": "growx-location-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-14",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "api.location.growxlabs.tech",
+      "custom_domain": true
+    }
+  ],
   "secrets": {
     "required": ["SUPABASE_URL", "SUPABASE_SECRET_KEY"]
   },
