@@ -2,12 +2,14 @@ import { Hono } from "hono";
 import { secureHeaders } from "hono/secure-headers";
 
 import { pingDatabases } from "./lib/keepalive";
+import { adminAuth } from "./middleware/admin-auth";
 import { apiKeyAuth } from "./middleware/api-key-auth";
 import { apiRateLimit } from "./middleware/api-rate-limit";
 import { ipRateLimit } from "./middleware/ip-rate-limit";
 import { requestId } from "./middleware/request-id";
 import { requestLogger } from "./middleware/request-logger";
 
+import { admin } from "./routes/admin";
 import { divisionsSearch } from "./routes/divisions-search";
 import { globalNearby } from "./routes/global-nearby";
 import { globalSearch } from "./routes/global-search";
@@ -75,6 +77,15 @@ app.use("/v1/*", apiKeyAuth);
 
 // 6. Tenant/API-key rate limit.
 app.use("/v1/*", apiRateLimit);
+
+// ---------------------------------------------------------------------------
+// ADMIN / OPS (grow-x server only, see docs/12-admin-ops-api.md)
+// ---------------------------------------------------------------------------
+
+app.use("/admin/*", ipRateLimit);
+app.use("/admin/*", adminAuth);
+
+app.route("/admin/v1", admin);
 
 // ---------------------------------------------------------------------------
 // ROUTES

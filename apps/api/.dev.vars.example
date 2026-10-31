@@ -1,2 +1,6 @@
 SUPABASE_URL=
 SUPABASE_SECRET_KEY=
+SUPABASE_GLOBAL_URL=
+SUPABASE_GLOBAL_KEY=
+# Optional. At least 32 characters. Enables /admin/v1 (grow-x server only).
+ADMIN_API_SECRET=

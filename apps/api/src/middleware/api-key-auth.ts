@@ -1,5 +1,6 @@
 import type { MiddlewareHandler } from "hono";
 import { hashApiKey, isGrowxApiKey } from "../lib/api-key";
+import { recordApiKeyUsage } from "../lib/api-key-usage";
 import { createSupabaseClient } from "../lib/supabase";
 import type { Bindings } from "../types/bindings";
 import type { AppVariables } from "../types/context";
@@ -135,6 +136,12 @@ export const apiKeyAuth: MiddlewareHandler<Env> = async (c, next) => {
     id: data.id,
     permissions,
   });
+
+  try {
+    c.executionCtx.waitUntil(recordApiKeyUsage(c.env, data.id, tenant.id));
+  } catch {
+    // No execution context (e.g. app.request in tests): skip usage counting.
+  }
 
   await next();
 };
