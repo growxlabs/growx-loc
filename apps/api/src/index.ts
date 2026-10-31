@@ -1,12 +1,16 @@
 import { Hono } from "hono";
 import { secureHeaders } from "hono/secure-headers";
 
+import { pingDatabases } from "./lib/keepalive";
 import { apiKeyAuth } from "./middleware/api-key-auth";
 import { apiRateLimit } from "./middleware/api-rate-limit";
 import { ipRateLimit } from "./middleware/ip-rate-limit";
 import { requestId } from "./middleware/request-id";
 import { requestLogger } from "./middleware/request-logger";
 
+import { divisionsSearch } from "./routes/divisions-search";
+import { globalNearby } from "./routes/global-nearby";
+import { globalSearch } from "./routes/global-search";
 import { imports } from "./routes/imports";
 import { locations } from "./routes/locations";
 import { me } from "./routes/me";
@@ -53,6 +57,12 @@ app.get("/health", (c) => {
   });
 });
 
+app.get("/health/keepalive", async (c) => {
+  const result = await pingDatabases(c.env);
+  const status = result.db1Core && result.db2Global ? 200 : 503;
+  return c.json(result, status);
+});
+
 // ---------------------------------------------------------------------------
 // PROTECTED V1
 // ---------------------------------------------------------------------------
@@ -80,6 +90,10 @@ app.route("/v1/imports", imports);
 
 app.route("/v1/service-areas", serviceAreas);
 app.route("/v1/service-area/check", serviceAreaCheck);
+
+app.route("/v1/global/search", globalSearch);
+app.route("/v1/global/nearby", globalNearby);
+app.route("/v1/divisions/search", divisionsSearch);
 
 // ---------------------------------------------------------------------------
 // FALLBACKS
@@ -124,4 +138,22 @@ app.onError((error, c) => {
   );
 });
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
+    ctx.waitUntil(
+      (async () => {
+        const pingResult = await pingDatabases(env);
+        console.log(
+          JSON.stringify({
+            level: "info",
+            event: "scheduled_keepalive_ping",
+            cron: event.cron,
+            scheduledTime: event.scheduledTime,
+            result: pingResult,
+          }),
+        );
+      })(),
+    );
+  },
+};

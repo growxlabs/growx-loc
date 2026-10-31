@@ -10,3 +10,13 @@ export function createSupabaseClient(env: Bindings) {
     },
   });
 }
+
+export function createGlobalSupabaseClient(env: Bindings) {
+  return createClient(env.SUPABASE_GLOBAL_URL, env.SUPABASE_GLOBAL_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
+}

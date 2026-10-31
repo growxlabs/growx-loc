@@ -373,6 +373,98 @@ if (!API_KEY) {
       );
     },
   );
+
+  // ---------------------------------------------------------------------------
+  // TEST 19: GLOBAL SEARCH
+  // ---------------------------------------------------------------------------
+  await runTest("19", "Global Search (GET /v1/global/search?q=Apollo)", async () => {
+    const res = await fetch(`${BASE_URL}/v1/global/search?q=Apollo`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "User-Agent": "GrowxLocationAcceptance/1.0",
+      },
+    });
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const data = (await res.json()) as { data?: unknown[]; count?: number };
+    assert(Array.isArray(data.data) && (data.count ?? 0) > 0, "Expected non-empty search results");
+  });
+
+  // ---------------------------------------------------------------------------
+  // TEST 20: POSTGIS GLOBAL NEARBY
+  // ---------------------------------------------------------------------------
+  await runTest("20", "PostGIS Global Nearby (GET /v1/global/nearby)", async () => {
+    const res = await fetch(`${BASE_URL}/v1/global/nearby?lat=16.5062&lng=80.6480&radius=10`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "User-Agent": "GrowxLocationAcceptance/1.0",
+      },
+    });
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const data = (await res.json()) as { data?: unknown[]; count?: number };
+    assert(Array.isArray(data.data) && (data.count ?? 0) > 0, "Expected nearby places found");
+  });
+
+  // ---------------------------------------------------------------------------
+  // TEST 21: D1 DIVISIONS SEARCH WILDCARD ESCAPING (%)
+  // ---------------------------------------------------------------------------
+  await runTest("21", "D1 Divisions Search Wildcard Escaping (q=%)", async () => {
+    const res = await fetch(`${BASE_URL}/v1/divisions/search?q=%25`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "User-Agent": "GrowxLocationAcceptance/1.0",
+      },
+    });
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const data = (await res.json()) as { data?: unknown[]; count?: number };
+    assert(data.count === 0, `Expected 0 matches for literal '%', got ${data.count}`);
+  });
+
+  // ---------------------------------------------------------------------------
+  // TEST 22: D1 DIVISIONS SEARCH WILDCARD ESCAPING (_)
+  // ---------------------------------------------------------------------------
+  await runTest("22", "D1 Divisions Search Wildcard Escaping (q=_)", async () => {
+    const res = await fetch(`${BASE_URL}/v1/divisions/search?q=_`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "User-Agent": "GrowxLocationAcceptance/1.0",
+      },
+    });
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const data = (await res.json()) as { data?: unknown[]; count?: number };
+    assert(data.count === 0, `Expected 0 matches for literal '_', got ${data.count}`);
+  });
+
+  // ---------------------------------------------------------------------------
+  // TEST 23: D1 DIVISIONS SEARCH EXACT (Vijayawada)
+  // ---------------------------------------------------------------------------
+  await runTest("23", "D1 Divisions Search (q=Vijayawada)", async () => {
+    const res = await fetch(`${BASE_URL}/v1/divisions/search?q=Vijayawada`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "User-Agent": "GrowxLocationAcceptance/1.0",
+      },
+    });
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const data = (await res.json()) as { data?: { name: string }[]; count?: number };
+    assert((data.count ?? 0) > 0, "Expected at least 1 match for Vijayawada");
+    assert(data.data?.[0]?.name.toLowerCase().includes("vijayawada"), "Expected Vijayawada in results");
+  });
+
+  // ---------------------------------------------------------------------------
+  // TEST 24: D1 DIVISIONS SEARCH REGION (Andhra Pradesh)
+  // ---------------------------------------------------------------------------
+  await runTest("24", "D1 Divisions Search (q=Andhra Pradesh&subtype=region)", async () => {
+    const res = await fetch(`${BASE_URL}/v1/divisions/search?q=Andhra%20Pradesh&subtype=region`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "User-Agent": "GrowxLocationAcceptance/1.0",
+      },
+    });
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const data = (await res.json()) as { data?: { name: string; subtype: string }[]; count?: number };
+    assert((data.count ?? 0) > 0, "Expected at least 1 match for Andhra Pradesh");
+    assert(data.data?.[0]?.subtype === "region", "Expected subtype 'region'");
+  });
 }
 
 console.log(`\n======================================================`);

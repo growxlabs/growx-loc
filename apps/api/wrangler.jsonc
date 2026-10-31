@@ -10,8 +10,23 @@
       "custom_domain": true
     }
   ],
+  "triggers": {
+    "crons": ["0 */6 * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "REFERENCE_DB",
+      "database_name": "growx-location-reference",
+      "database_id": "4db529a7-a487-4a41-9ae3-3a288f4d4270"
+    }
+  ],
   "secrets": {
-    "required": ["SUPABASE_URL", "SUPABASE_SECRET_KEY"]
+    "required": [
+      "SUPABASE_URL",
+      "SUPABASE_SECRET_KEY",
+      "SUPABASE_GLOBAL_URL",
+      "SUPABASE_GLOBAL_KEY"
+    ]
   },
   "ratelimits": [
     {

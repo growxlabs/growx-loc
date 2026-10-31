@@ -13,3 +13,11 @@ dist
 
 .DS_Store
 *.log
+__pycache__/
+*.py[cod]
+*.pem
+*.key
+*.cert
+credentials.json
+service-account.json
+secrets.*
