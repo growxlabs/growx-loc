@@ -32,7 +32,7 @@ async function secretsMatch(
 }
 
 export const adminAuth = createMiddleware<Env>(async (c, next) => {
-  const expected = c.env.ADMIN_API_SECRET;
+  const expected = c.env.ADMIN_API_SECRET?.trim();
 
   if (!expected || expected.length < MIN_SECRET_LENGTH) {
     return c.json(
