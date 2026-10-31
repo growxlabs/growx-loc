@@ -137,6 +137,12 @@ else:
     divisions_in_db = cur.fetchone()[0]
     print(f"  ✅ public.global_divisions count: {divisions_in_db} rows (took {time.time() - div_t0:.2f}s)")
 
+# Pass --divisions-only to stop after divisions and skip the (slow) places ingest.
+if "--divisions-only" in sys.argv:
+    conn.close()
+    print(f"\nDivisions-only run finished in {time.time() - start_time:.2f}s.")
+    sys.exit(0)
+
 # ---------------------------------------------------------------------------
 # 3. INGEST PLACES (Shared POIs: Businesses, Hospitals, Dealers, Schools)
 # ---------------------------------------------------------------------------

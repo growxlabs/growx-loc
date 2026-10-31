@@ -53,7 +53,8 @@ with open("packages/db/migrations/d1-seed-divisions.sql", "w", encoding="utf-8")
             src_id_val = escape_sql(r[9])
             values_list.append(f"({id_val}, {country_val}, {subtype_val}, {name_val}, {names_json}, {parent_val}, {lat_val}, {lng_val}, {src_val}, {src_id_val})")
         
-        sql = f"INSERT OR IGNORE INTO divisions (id, country, subtype, name, names_json, parent_id, latitude, longitude, source, source_id) VALUES\n" + ",\n".join(values_list) + ";\n"
+        # REPLACE so re-running the seed updates rows already in D1 (e.g. corrected coordinates).
+        sql = f"INSERT OR REPLACE INTO divisions (id, country, subtype, name, names_json, parent_id, latitude, longitude, source, source_id) VALUES\n" + ",\n".join(values_list) + ";\n"
         f.write(sql)
 
 conn.close()
